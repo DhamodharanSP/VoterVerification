@@ -42,7 +42,7 @@ const DummyVoterVerification = () => {
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">✅ Voter Verified</h2>
-              <p className="text-gray-600">Voter ID: ID12345 - John Doe</p>
+              <p className="text-gray-600">Voter ID: ID12345 - Dhamodharan</p>
             </div>
           </div>
           <p className="text-green-600 font-semibold">Verification complete successfully!</p>
