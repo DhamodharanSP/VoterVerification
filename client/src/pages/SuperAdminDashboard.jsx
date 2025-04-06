@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react"
 import { Routes, Route, Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
-import { Users, UserPlus, LogOut, Home } from "lucide-react"
+import { Users, UserPlus, LogOut, Home, CheckCircle, XCircle, AlertTriangle } from "lucide-react"
 import VotersList from "../components/VotersList"
 import AddBoothHead from "../components/AddBoothHead"
+import axios from "axios"
 
 const SuperAdminDashboard = () => {
   const { currentUser, logout } = useAuth()
@@ -70,74 +71,94 @@ const SuperAdminDashboard = () => {
   )
 }
 
+// 🧠 Dynamic Dashboard Component
 const DashboardHome = () => {
-  const [stats, setStats] = useState({
-    totalVoters: 0,
-    verifiedVoters: 0,
-    pendingVerifications: 0,
-    boothHeads: 0,
-  })
+  const [stats, setStats] = useState(null)
+  const [boothActivities, setBoothActivities] = useState([])
 
   useEffect(() => {
-    // In a real app, fetch this data from your API
-    setStats({
-      totalVoters: 1250,
-      verifiedVoters: 450,
-      pendingVerifications: 15,
-      boothHeads: 8,
-    })
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/super-admin/dashboard-stats") // Update URL if deployed
+        setStats(res.data.stats)
+        setBoothActivities(res.data.boothActivities)
+      } catch (error) {
+        console.error("Error fetching dashboard stats:", error)
+      }
+    }
+
+    fetchStats()
   }, [])
+
+  if (!stats) return <div>Loading dashboard...</div>
 
   return (
     <div>
-      <h2 className="mb-6 text-2xl font-semibold text-gray-500">Dashboard Overview</h2>
+      <h2 className="mb-6 text-2xl font-semibold text-gray-600">Dashboard Overview</h2>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-500">Total Voters</h3>
-          <p className="mt-2 text-3xl font-bold text-gray-500">{stats.totalVoters}</p>
-        </div>
-
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-500">Verified Voters</h3>
-          <p className="mt-2 text-3xl font-bold text-green-600">{stats.verifiedVoters}</p>
-        </div>
-
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-500">Pending Verifications</h3>
-          <p className="mt-2 text-3xl font-bold text-yellow-600">{stats.pendingVerifications}</p>
-        </div>
-
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-500">Booth Heads</h3>
-          <p className="mt-2 text-3xl font-bold text-blue-600">{stats.boothHeads}</p>
-        </div>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        <Card title="Total Voters" value={stats.totalVoters} color="gray" />
+        <Card title="Verified Votes" value={stats.verifiedVotes} color="green" />
+        <Card title="Rejected Votes" value={stats.rejectedVotes} color="red" />
+        <Card title="Multiple Attempts" value={stats.multipleAttempts} color="yellow" />
+        <Card title="Booth Heads" value={stats.boothHeads} color="blue" />
       </div>
 
-      <div className="mt-8 bg-white rounded-lg shadow text-gray-500">
-        <div className="px-6 py-4 border-b">
-          <h3 className="text-lg font-medium">Recent Activity</h3>
+      {/* Booth Agent Activity */}
+      <div className="mt-10 bg-white rounded-lg shadow">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800">Booth Agent Activity</h3>
         </div>
-        <div className="p-6">
-          <ul className="space-y-4">
-            <li className="p-3 rounded-md bg-gray-50">
-              <span className="text-sm text-gray-500">Today, 10:30 AM</span>
-              <p>Booth Head "East District 1" verified 25 voters</p>
-            </li>
-            <li className="p-3 rounded-md bg-gray-50">
-              <span className="text-sm text-gray-500">Today, 9:15 AM</span>
-              <p>New Booth Head account created for "North District 3"</p>
-            </li>
-            <li className="p-3 rounded-md bg-gray-50">
-              <span className="text-sm text-gray-500">Yesterday, 4:45 PM</span>
-              <p>System detected and prevented 2 duplicate voting attempts</p>
-            </li>
-          </ul>
+        <div className="p-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {boothActivities.map((booth, idx) => (
+            <div
+              key={idx}
+              className="rounded-lg shadow-lg bg-gradient-to-br from-blue-50 to-white border border-blue-100 hover:shadow-xl transition-all duration-300"
+            >
+              <div className="px-5 py-4 border-b bg-blue-100 rounded-t-lg">
+                <h4 className="text-lg font-semibold text-blue-800">{booth.booth}</h4>
+              </div>
+              <div className="p-5 space-y-2 text-sm text-gray-700">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="text-green-600 w-5 h-5" />
+                  <span className="font-medium">Verified Votes:</span>
+                  <span className="ml-auto font-bold text-green-700">{booth.verified}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <XCircle className="text-red-600 w-5 h-5" />
+                  <span className="font-medium">Rejected Votes:</span>
+                  <span className="ml-auto font-bold text-red-700">{booth.rejected}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="text-yellow-600 w-5 h-5" />
+                  <span className="font-medium">Multiple Attempts:</span>
+                  <span className="ml-auto font-bold text-yellow-700">{booth.multipleAttempts}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   )
 }
 
-export default SuperAdminDashboard
+const Card = ({ title, value, color }) => {
+  const colorMap = {
+    gray: "text-gray-700",
+    green: "text-green-600",
+    red: "text-red-600",
+    yellow: "text-yellow-600",
+    blue: "text-blue-600",
+  }
 
+  return (
+    <div className="p-6 bg-white rounded-lg shadow">
+      <h3 className="text-lg font-medium text-gray-500">{title}</h3>
+      <p className={`mt-2 text-3xl font-bold ${colorMap[color]}`}>{value}</p>
+    </div>
+  )
+}
+
+export default SuperAdminDashboard

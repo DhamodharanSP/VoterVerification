@@ -12,6 +12,7 @@ const AddBoothHead = () => {
     boothLocation: "",
     contactNumber: "",
     email: "",
+    boothNumber: "",
   })
 
   const [errors, setErrors] = useState({})
@@ -25,7 +26,6 @@ const AddBoothHead = () => {
       [name]: value,
     }))
 
-    // Clear error when user types
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -46,6 +46,7 @@ const AddBoothHead = () => {
     if (!formData.contactNumber.trim()) newErrors.contactNumber = "Contact number is required"
     if (!formData.email.trim()) newErrors.email = "Email is required"
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid"
+    if (!formData.boothNumber.trim()) newErrors.boothNumber = "Booth number is required"
 
     return newErrors
   }
@@ -63,9 +64,18 @@ const AddBoothHead = () => {
     setLoading(true)
 
     try {
-      // In a real app, this would be an API call to your backend
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      const response = await fetch("http://localhost:5000/api/booth-head/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Something went wrong")
+      }
 
       setSuccess(true)
       setFormData({
@@ -76,10 +86,11 @@ const AddBoothHead = () => {
         boothLocation: "",
         contactNumber: "",
         email: "",
+        boothNumber: "",
       })
     } catch (err) {
       console.error(err)
-      setErrors({ form: "Failed to create account. Please try again." })
+      setErrors({ form: err.message || "Failed to create account. Please try again." })
     } finally {
       setLoading(false)
     }
@@ -209,6 +220,21 @@ const AddBoothHead = () => {
               />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
+
+            <div className="md:col-span-2">
+              <label htmlFor="boothNumber" className="block text-sm font-medium text-gray-700">
+                Booth Number
+              </label>
+              <input
+                type="number"
+                id="boothNumber"
+                name="boothNumber"
+                value={formData.boothNumber}
+                onChange={handleChange}
+                className={`mt-1 block w-full rounded-md border ${errors.boothNumber ? "border-red-500" : "border-gray-300"} px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 bg-blue-200 text-gray-600`}
+              />
+              {errors.boothNumber && <p className="mt-1 text-sm text-red-600">{errors.boothNumber}</p>}
+            </div>
           </div>
 
           <div className="mt-8">
@@ -256,4 +282,3 @@ const AddBoothHead = () => {
 }
 
 export default AddBoothHead
-

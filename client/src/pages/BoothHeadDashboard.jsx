@@ -5,7 +5,7 @@ import { Routes, Route, Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { Bell, LogOut, Home, CheckCircle, AlertTriangle } from "lucide-react"
 import NotificationsList from "../components/NotificationsList"
-
+import VoterVerification from "../components/VoterVerification"
 const BoothHeadDashboard = () => {
   const { currentUser, logout } = useAuth()
   const navigate = useNavigate()
@@ -35,21 +35,18 @@ const BoothHeadDashboard = () => {
             Dashboard Home
           </Link>
           <Link
-            to="/booth-head/notifications"
+            to="/booth-head/verifications"
             className="flex items-center px-4 py-3 text-green-100 hover:bg-green-700"
           >
             <Bell className="w-5 h-5 mr-3" />
-            Notifications
+            Verifications
             {notificationCount > 0 && (
               <span className="flex items-center justify-center w-6 h-6 ml-auto text-xs font-semibold text-white bg-red-500 rounded-full">
                 {notificationCount}
               </span>
             )}
           </Link>
-          <Link to="/verify" className="flex items-center px-4 py-3 text-green-100 hover:bg-green-700">
-            <CheckCircle className="w-5 h-5 mr-3" />
-            Verify Voter
-          </Link>
+          
           <button
             onClick={handleLogout}
             className="flex items-center w-full px-4 py-3 mt-8 text-green-100 hover:bg-green-700"
@@ -71,7 +68,7 @@ const BoothHeadDashboard = () => {
         <main className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
           <Routes>
             <Route path="/" element={<BoothDashboardHome />} />
-            <Route path="/notifications" element={<NotificationsList />} />
+            <Route path="/verifications" element={<VoterVerification />} />
           </Routes>
         </main>
       </div>
