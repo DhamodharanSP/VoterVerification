@@ -23,7 +23,12 @@ const Login = () => {
       if (username === "admin" && password === "admin123") {
         login({ id: "1", username: "admin", role: "superadmin" })
         navigate("/super-admin")
-      } else {
+      }
+        else if (username === "booth" && password === "booth123") {
+      login({ id: "2", username: "booth", role: "boothhead" })
+      navigate("/booth-head")
+    }
+      else {
         const response = await fetch("http://localhost:5000/api/booth-head-routes/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
